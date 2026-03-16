@@ -4,7 +4,9 @@ import (
 "crypto/rand"
 "fmt"
 "log"
+"math"
 "math/big"
+"regexp"
 "strings"
 "time"
 )
@@ -63,4 +65,30 @@ continue
 sb.WriteByte(chars[n.Int64()])
 }
 return sb.String()
+}
+
+var nonAlnumDotHyphenUnderscore = regexp.MustCompile(`[^a-zA-Z0-9._-]`)
+var multipleUnderscores = regexp.MustCompile(`_+`)
+
+func SanitizeFilename(filename string) string {
+s := nonAlnumDotHyphenUnderscore.ReplaceAllString(filename, "_")
+s = multipleUnderscores.ReplaceAllString(s, "_")
+return strings.ToLower(s)
+}
+
+var nonAlnum = regexp.MustCompile(`[^a-zA-Z0-9]`)
+
+func GetEmailUsername(email string) string {
+parts := strings.SplitN(email, "@", 2)
+return nonAlnum.ReplaceAllString(parts[0], "_")
+}
+
+func FormatDate(date time.Time) string {
+return date.Format("January 2, 2006")
+}
+
+func DaysRemaining(targetDate time.Time) int {
+diff := targetDate.Sub(time.Now())
+days := diff.Hours() / 24
+return int(math.Ceil(days))
 }
