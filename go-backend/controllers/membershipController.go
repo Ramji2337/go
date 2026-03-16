@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"context"
+	"log"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -18,54 +20,183 @@ func CheckMembership(c *fiber.Ctx) error {
 	defer cancel()
 
 	col := config.GetCollection("memberships")
+
+	// Match Node.js: require membershipId exists, isAdminApproved, active, paymentStatus completed
+	filter := bson.M{
+		"email":           strings.ToLower(claims.Email),
+		"membershipId":    bson.M{"$exists": true, "$ne": nil, "$not": bson.M{"$eq": ""}},
+		"isAdminApproved": true,
+		"active":          true,
+		"paymentStatus":   "completed",
+	}
 	var membership bson.M
-	col.FindOne(ctx, bson.M{"email": claims.Email}).Decode(&membership)
+	err := col.FindOne(ctx, filter).Decode(&membership)
+
+	if err != nil || membership == nil {
+		return c.Status(200).JSON(fiber.Map{
+			"success":        true,
+			"isMember":       false,
+			"membershipType": nil,
+			"status":         nil,
+			"membershipId":   nil,
+		})
+	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"success":      true,
-		"hasMembership": membership != nil,
-		"membership":   membership,
+		"success":         true,
+		"isMember":        true,
+		"membershipType":  membership["membershipType"],
+		"status":          membership["status"],
+		"membershipId":    membership["membershipId"],
+		"currentPosition": membership["currentPosition"],
+		"experience":      membership["experience"],
+		"approvedAt":      membership["approvedAt"],
 	})
 }
 
 func GetRegistrationFee(c *fiber.Ctx) error {
 	claims := c.Locals("user").(*middleware.JWTClaims)
+	participantType := c.Query("participantType")
+	isInternational := c.Query("isInternational")
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// Check if user has accepted paper
-	faCol := config.GetCollection("finalacceptances")
-	var acceptance bson.M
-	faCol.FindOne(ctx, bson.M{"authorEmail": claims.Email}).Decode(&acceptance)
+	log.Printf("Getting registration fee for: %s, %s, %s", claims.Email, participantType, isInternational)
 
-	if acceptance == nil {
-		return c.Status(200).JSON(fiber.Map{
-			"success": true,
-			"fee": fiber.Map{
-				"amount":   "Please contact admin",
-				"currency": "USD",
-			},
-		})
+	// Check SCIS membership
+	isSCISMember := false
+	var membershipData bson.M
+
+	memCol := config.GetCollection("memberships")
+	memFilter := bson.M{
+		"email":           strings.ToLower(claims.Email),
+		"membershipId":    bson.M{"$exists": true, "$ne": nil, "$not": bson.M{"$eq": ""}},
+		"isAdminApproved": true,
+		"active":          true,
+		"paymentStatus":   "completed",
+	}
+	if err := memCol.FindOne(ctx, memFilter).Decode(&membershipData); err == nil {
+		isSCISMember = true
 	}
 
-	// Check membership
-	memCol := config.GetCollection("memberships")
-	var membership bson.M
-	memCol.FindOne(ctx, bson.M{"email": claims.Email, "active": true}).Decode(&membership)
+	log.Printf("Is SCIS Member: %v", isSCISMember)
 
-	fee := 300.0
-	if membership != nil {
-		fee = 250.0
+	// Fee structure matching Node.js
+	type feeEntry struct {
+		scis    float64
+		nonScis float64
+	}
+
+	indianFees := map[string]feeEntry{
+		"student":  {scis: 4500, nonScis: 5850},
+		"faculty":  {scis: 6750, nonScis: 7500},
+		"scholar":  {scis: 6750, nonScis: 7500},
+		"listener": {scis: 2500, nonScis: 3500},
+	}
+	foreignFees := map[string]feeEntry{
+		"author":   {scis: 300, nonScis: 350},
+		"listener": {scis: 100, nonScis: 150},
+	}
+	indonesianFees := map[string]feeEntry{
+		"author":   {scis: 1700000, nonScis: 2600000},
+		"listener": {scis: 1200000, nonScis: 1500000},
+	}
+
+	var fee float64
+	currency := "INR"
+	category := ""
+	var membershipDiscount float64
+
+	switch isInternational {
+	case "indonesian":
+		currency = "IDR"
+		if participantType == "author" {
+			entry := indonesianFees["author"]
+			if isSCISMember {
+				fee = entry.scis
+			} else {
+				fee = entry.nonScis
+			}
+			membershipDiscount = entry.nonScis - entry.scis
+			category = "Indonesian Author"
+		} else {
+			entry := indonesianFees["listener"]
+			if isSCISMember {
+				fee = entry.scis
+			} else {
+				fee = entry.nonScis
+			}
+			membershipDiscount = entry.nonScis - entry.scis
+			category = "Indonesian Listener"
+		}
+	case "true":
+		currency = "USD"
+		if participantType == "author" {
+			entry := foreignFees["author"]
+			if isSCISMember {
+				fee = entry.scis
+			} else {
+				fee = entry.nonScis
+			}
+			membershipDiscount = entry.nonScis - entry.scis
+			category = "Foreign Author"
+		} else {
+			entry := foreignFees["listener"]
+			if isSCISMember {
+				fee = entry.scis
+			} else {
+				fee = entry.nonScis
+			}
+			membershipDiscount = entry.nonScis - entry.scis
+			category = "Foreign Listener"
+		}
+	default:
+		// Indian participant
+		var entry feeEntry
+		switch participantType {
+		case "student":
+			entry = indianFees["student"]
+			category = "Indian Student"
+		case "faculty":
+			entry = indianFees["faculty"]
+			category = "Indian Faculty"
+		case "scholar":
+			entry = indianFees["scholar"]
+			category = "Indian Research Scholar"
+		default:
+			entry = indianFees["listener"]
+			category = "Indian Listener"
+		}
+		if isSCISMember {
+			fee = entry.scis
+		} else {
+			fee = entry.nonScis
+		}
+		membershipDiscount = entry.nonScis - entry.scis
+	}
+
+	discount := float64(0)
+	if isSCISMember {
+		discount = membershipDiscount
+	}
+
+	var membershipType interface{}
+	var membershipId interface{}
+	if membershipData != nil {
+		membershipType = membershipData["membershipType"]
+		membershipId = membershipData["membershipId"]
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"success": true,
-		"fee": fiber.Map{
-			"amount":        fee,
-			"currency":      "USD",
-			"hasMembership": membership != nil,
-			"discount":      membership != nil,
-		},
+		"success":            true,
+		"fee":                fee,
+		"currency":           currency,
+		"category":           category,
+		"isSCISMember":       isSCISMember,
+		"membershipType":     membershipType,
+		"membershipId":       membershipId,
+		"membershipDiscount": discount,
 	})
 }
 
@@ -79,21 +210,41 @@ func CheckUserMembership(c *fiber.Ctx) error {
 
 	email := input.Email
 	if email == "" {
-		claims := c.Locals("user").(*middleware.JWTClaims)
-		email = claims.Email
+		return c.Status(400).JSON(fiber.Map{"success": false, "error": "Email is required"})
 	}
+
+	log.Printf("Admin checking membership for email: %s", email)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	col := config.GetCollection("memberships")
+	filter := bson.M{
+		"email":           strings.ToLower(email),
+		"membershipId":    bson.M{"$exists": true, "$ne": nil, "$not": bson.M{"$eq": ""}},
+		"isAdminApproved": true,
+		"active":          true,
+		"paymentStatus":   "completed",
+	}
 	var membership bson.M
-	col.FindOne(ctx, bson.M{"email": email}).Decode(&membership)
+	err := col.FindOne(ctx, filter).Decode(&membership)
+
+	isMember := err == nil && membership != nil
+	log.Printf("Membership found for %s: %v", email, isMember)
+
+	var membershipType, membershipId, status interface{}
+	if membership != nil {
+		membershipType = membership["membershipType"]
+		membershipId = membership["membershipId"]
+		status = membership["status"]
+	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"success":      true,
-		"hasMembership": membership != nil,
-		"membership":   membership,
+		"success":        true,
+		"isMember":       isMember,
+		"membershipType": membershipType,
+		"membershipId":   membershipId,
+		"status":         status,
 	})
 }
 
