@@ -14,7 +14,6 @@ import (
 	"go-backend/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -1153,6 +1152,3 @@ func UpdateAcceptanceStatus(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(fiber.Map{"success": true, "message": "Status updated"})
 }
-
-// Unused function suppressor
-var _ = mongo.ErrNoDocuments

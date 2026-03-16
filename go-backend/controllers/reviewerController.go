@@ -2,8 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -536,7 +534,3 @@ func GetAllMessageThreadsReviewer(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(fiber.Map{"success": true, "threads": threads})
 }
-
-// Suppress unused import warnings
-var _ = fmt.Sprintf
-var _ = log.Println

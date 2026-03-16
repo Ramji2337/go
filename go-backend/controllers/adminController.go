@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -70,11 +69,9 @@ func CreateEditor(c *fiber.Ctx) error {
 	}
 
 	go func() {
-		loginURL := fmt.Sprintf("%s/login", utils.FrontendURL())
 		if err := utils.SendEditorCredentialsEmail(input.Email, username, password); err != nil {
 			log.Printf("Failed to send editor credentials email: %v", err)
 		}
-		_ = loginURL
 	}()
 
 	return c.Status(201).JSON(fiber.Map{
