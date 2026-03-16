@@ -10,6 +10,7 @@ import (
 func SetupCommitteeRoutes(app *fiber.App) {
 	committee := app.Group("/api/committee")
 	committee.Get("/", controllers.GetCommitteeMembers)
+	committee.Get("/:id", controllers.GetMemberById)
 	committee.Post("/", middleware.VerifyJWT, middleware.RequireAdmin, controllers.CreateCommitteeMember)
 	committee.Put("/:id", middleware.VerifyJWT, middleware.RequireAdmin, controllers.UpdateCommitteeMember)
 	committee.Delete("/:id", middleware.VerifyJWT, middleware.RequireAdmin, controllers.DeleteCommitteeMember)
@@ -19,9 +20,13 @@ func SetupCopyrightRoutes(app *fiber.App) {
 	copyright := app.Group("/api/copyright", middleware.VerifyJWT)
 	copyright.Get("/", controllers.GetCopyrights)
 	copyright.Get("/my", controllers.GetCopyrightByAuthor)
-	copyright.Get("/:submissionId", controllers.GetCopyrightBySubmissionId)
+	copyright.Get("/author/dashboard", controllers.GetAuthorCopyrightDashboard)
 	copyright.Post("/submit", controllers.SubmitCopyright)
 	copyright.Post("/upload-camera-ready", controllers.UploadCameraReady)
+	copyright.Post("/mark-read", controllers.MarkCopyrightMessagesAsRead)
+	copyright.Get("/admin/list", middleware.RequireAdmin, controllers.GetCopyrights)
+	copyright.Post("/admin/review", middleware.RequireAdmin, controllers.ReviewCopyrightForm)
+	copyright.Get("/:submissionId", controllers.GetCopyrightBySubmissionId)
 	copyright.Post("/:submissionId/message", controllers.SendCopyrightMessage)
 	copyright.Get("/:submissionId/messages", controllers.GetCopyrightMessages)
 	copyright.Post("/:submissionId/final-doc", controllers.UploadFinalDoc)
@@ -37,11 +42,17 @@ func SetupPaperMessageRoutes(app *fiber.App) {
 }
 
 func SetupSupportMessageRoutes(app *fiber.App) {
-	support := app.Group("/api/support")
-	support.Post("/", middleware.OptionalJWT, controllers.SubmitSupportMessage)
-	support.Get("/", middleware.VerifyJWT, middleware.RequireAdmin, controllers.GetSupportMessages)
-	support.Put("/:id", middleware.VerifyJWT, middleware.RequireAdmin, controllers.UpdateSupportMessageStatus)
-	support.Delete("/:id", middleware.VerifyJWT, middleware.RequireAdmin, controllers.DeleteSupportMessage)
+	support := app.Group("/api/support-messages")
+	support.Get("/my-messages", middleware.VerifyJWT, controllers.GetMySupportMessages)
+	support.Post("/send", middleware.OptionalJWT, controllers.SubmitSupportMessage)
+	support.Get("/all-threads", middleware.VerifyJWT, middleware.RequireAdmin, controllers.GetAllSupportThreads)
+
+	// Keep legacy /api/support routes for backward compatibility
+	supportLegacy := app.Group("/api/support")
+	supportLegacy.Post("/", middleware.OptionalJWT, controllers.SubmitSupportMessage)
+	supportLegacy.Get("/", middleware.VerifyJWT, middleware.RequireAdmin, controllers.GetSupportMessages)
+	supportLegacy.Put("/:id", middleware.VerifyJWT, middleware.RequireAdmin, controllers.UpdateSupportMessageStatus)
+	supportLegacy.Delete("/:id", middleware.VerifyJWT, middleware.RequireAdmin, controllers.DeleteSupportMessage)
 }
 
 func SetupMembershipRoutes(app *fiber.App) {
@@ -101,4 +112,16 @@ func SetupDirectRoutes(app *fiber.App) {
 	api.Post("/selected-users", middleware.VerifyJWT, middleware.RequireAdmin, controllers.AddConferenceSelectedUser)
 	api.Delete("/selected-users/:id", middleware.VerifyJWT, middleware.RequireAdmin, controllers.RemoveConferenceSelectedUser)
 	api.Get("/payment-done-users", middleware.VerifyJWT, middleware.RequireAdmin, controllers.GetPaymentDoneUsers)
+}
+
+func SetupServerRoutes(app *fiber.App) {
+	// Direct routes from server.js
+	app.Get("/user-submission", middleware.VerifyJWT, controllers.GetUserSubmissionDirect)
+	app.Get("/revision-status", middleware.VerifyJWT, controllers.GetRevisionStatusDirect)
+	app.Post("/submit-revised-paper", middleware.VerifyJWT, controllers.SubmitRevisedPaper)
+
+	// Test routes
+	app.Get("/test/paperfetch", controllers.TestPaperFetch)
+	app.Get("/test/pdf-fetch", controllers.TestPdfFetch)
+	app.Get("/test/cloudinary-pdf", controllers.TestCloudinaryPdf)
 }

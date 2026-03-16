@@ -84,6 +84,7 @@ func main() {
 	routes.SetupAdminPaperAcceptanceRoutes(app)
 	routes.SetupPaymentRegistrationRoutes(app)
 	routes.SetupDirectRoutes(app)
+	routes.SetupServerRoutes(app)
 
 	app.Use(func(c *fiber.Ctx) error {
 		return c.Status(404).JSON(fiber.Map{
