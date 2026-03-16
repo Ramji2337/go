@@ -20,6 +20,7 @@ func SetupPaperRoutes(app *fiber.App) {
 	papers.Get("/status/:submissionId", controllers.GetPaperStatus)
 	papers.Get("/revision/:submissionId", controllers.GetRevisionData)
 	papers.Get("/revisions/:submissionId", controllers.GetAllRevisions)
+	papers.Post("/upload-final-doc/:submissionId", controllers.UploadFinalDoc)
 	papers.Get("/all", middleware.RequireRole("Admin", "Editor"), controllers.GetAllPapersAdmin)
 	papers.Get("/:submissionId/history", controllers.GetPaperHistory)
 	papers.Get("/:id", middleware.RequireRole("Admin", "Editor", "Reviewer"), controllers.GetPaperById)
