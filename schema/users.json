@@ -1,0 +1,47 @@
+{
+  "_id": [
+    "object"
+  ],
+  "username": [
+    "string"
+  ],
+  "email": [
+    "string"
+  ],
+  "password": [
+    "string"
+  ],
+  "role": [
+    "string"
+  ],
+  "isGoogleAuth": [
+    "boolean"
+  ],
+  "verified": [
+    "boolean"
+  ],
+  "createdAt": [
+    "date"
+  ],
+  "__v": [
+    "number"
+  ],
+  "tempPassword": [
+    "string",
+    "null"
+  ],
+  "country": [
+    "string",
+    "null"
+  ],
+  "verificationToken": [
+    "string"
+  ],
+  "verificationExpires": [
+    "date"
+  ],
+  "userType": [
+    "string",
+    "null"
+  ]
+}

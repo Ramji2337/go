@@ -1,0 +1,89 @@
+{
+  "_id": [
+    "object"
+  ],
+  "userId": [
+    "object"
+  ],
+  "email": [
+    "string"
+  ],
+  "name": [
+    "string"
+  ],
+  "institution": [
+    "string"
+  ],
+  "address": [
+    "string"
+  ],
+  "country": [
+    "string"
+  ],
+  "paymentMethod": [
+    "string"
+  ],
+  "transactionId": [
+    "string"
+  ],
+  "amount": [
+    "number"
+  ],
+  "currency": [
+    "string"
+  ],
+  "paymentScreenshot": [
+    "string"
+  ],
+  "registrationCategory": [
+    "string"
+  ],
+  "isScisMember": [
+    "boolean"
+  ],
+  "scisMembershipId": [
+    "null"
+  ],
+  "paymentStatus": [
+    "string"
+  ],
+  "conferenceYear": [
+    "number"
+  ],
+  "conferenceName": [
+    "string"
+  ],
+  "certificateGenerated": [
+    "boolean"
+  ],
+  "registrationDate": [
+    "date"
+  ],
+  "createdAt": [
+    "date"
+  ],
+  "updatedAt": [
+    "date"
+  ],
+  "registrationNumber": [
+    "string"
+  ],
+  "__v": [
+    "number"
+  ],
+  "verificationNotes": [
+    "string"
+  ],
+  "verifiedAt": [
+    "date"
+  ],
+  "verifiedBy": [
+    "object"
+  ],
+  "verifiedByEmail": [
+    "string"
+  ],
+  "verifiedByName": [
+    "string"
+  ]
+}

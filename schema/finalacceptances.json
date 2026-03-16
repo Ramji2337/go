@@ -1,0 +1,95 @@
+{
+  "_id": [
+    "object"
+  ],
+  "paperId": [
+    "object"
+  ],
+  "submissionId": [
+    "string"
+  ],
+  "paperTitle": [
+    "string"
+  ],
+  "authorName": [
+    "string"
+  ],
+  "authorEmail": [
+    "string"
+  ],
+  "pdfUrl": [
+    "string"
+  ],
+  "pdfPublicId": [
+    "string"
+  ],
+  "pdfFileName": [
+    "string"
+  ],
+  "revisionPdfs": [
+    "object"
+  ],
+  "reviewsByRound": [
+    "array"
+  ],
+  "category": [
+    "string"
+  ],
+  "topic": [
+    "string"
+  ],
+  "reviewers": [
+    "array"
+  ],
+  "totalReviewers": [
+    "number"
+  ],
+  "averageRating": [
+    "number"
+  ],
+  "finalDecision": [
+    "string"
+  ],
+  "editorId": [
+    "object"
+  ],
+  "editorEmail": [
+    "string"
+  ],
+  "acceptanceDate": [
+    "date"
+  ],
+  "revisionCount": [
+    "number"
+  ],
+  "conferenceYear": [
+    "number"
+  ],
+  "conferenceName": [
+    "string"
+  ],
+  "status": [
+    "string"
+  ],
+  "metadata": [
+    "object"
+  ],
+  "createdAt": [
+    "date"
+  ],
+  "updatedAt": [
+    "date"
+  ],
+  "acceptanceCertificateNumber": [
+    "string"
+  ],
+  "__v": [
+    "number"
+  ],
+  "paymentRegistrationId": [
+    "object"
+  ],
+  "paymentStatus": [
+    "string"
+  ]
+}

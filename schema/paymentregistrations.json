@@ -1,0 +1,83 @@
+{
+  "_id": [
+    "object"
+  ],
+  "userId": [
+    "object"
+  ],
+  "authorEmail": [
+    "string"
+  ],
+  "authorName": [
+    "string"
+  ],
+  "paperId": [
+    "object"
+  ],
+  "submissionId": [
+    "string"
+  ],
+  "paperTitle": [
+    "string"
+  ],
+  "paperUrl": [
+    "string"
+  ],
+  "institution": [
+    "string"
+  ],
+  "address": [
+    "string"
+  ],
+  "country": [
+    "string"
+  ],
+  "paymentMethod": [
+    "string"
+  ],
+  "transactionId": [
+    "string"
+  ],
+  "amount": [
+    "number"
+  ],
+  "currency": [
+    "string"
+  ],
+  "paymentScreenshot": [
+    "string"
+  ],
+  "paymentScreenshotPublicId": [
+    "string"
+  ],
+  "paymentStatus": [
+    "string"
+  ],
+  "registrationCategory": [
+    "string"
+  ],
+  "registrationDate": [
+    "date"
+  ],
+  "createdAt": [
+    "date"
+  ],
+  "updatedAt": [
+    "date"
+  ],
+  "__v": [
+    "number"
+  ],
+  "rejectionReason": [
+    "string"
+  ],
+  "verifiedAt": [
+    "date"
+  ],
+  "verificationNotes": [
+    "string"
+  ],
+  "verifiedBy": [
+    "object"
+  ]
+}

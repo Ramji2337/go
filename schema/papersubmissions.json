@@ -1,0 +1,67 @@
+{
+  "_id": [
+    "object"
+  ],
+  "submissionId": [
+    "string"
+  ],
+  "paperTitle": [
+    "string"
+  ],
+  "authorName": [
+    "string"
+  ],
+  "email": [
+    "string"
+  ],
+  "category": [
+    "string"
+  ],
+  "abstract": [
+    "string",
+    "null"
+  ],
+  "pdfUrl": [
+    "string"
+  ],
+  "pdfPublicId": [
+    "string"
+  ],
+  "pdfFileName": [
+    "string"
+  ],
+  "status": [
+    "string"
+  ],
+  "assignedReviewers": [
+    "array"
+  ],
+  "finalDecision": [
+    "string",
+    "null"
+  ],
+  "revisionCount": [
+    "number"
+  ],
+  "collectionStatus": [
+    "string"
+  ],
+  "versions": [
+    "array"
+  ],
+  "reviewAssignments": [
+    "array"
+  ],
+  "revisionRequests": [
+    "array"
+  ],
+  "createdAt": [
+    "date"
+  ],
+  "updatedAt": [
+    "date"
+  ],
+  "__v": [
+    "number"
+  ]
+}

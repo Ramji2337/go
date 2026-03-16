@@ -1,0 +1,74 @@
+{
+  "_id": [
+    "object"
+  ],
+  "paperId": [
+    "object"
+  ],
+  "submissionId": [
+    "string"
+  ],
+  "paperTitle": [
+    "string"
+  ],
+  "authorName": [
+    "string"
+  ],
+  "authorEmail": [
+    "string"
+  ],
+  "pdfUrl": [
+    "string"
+  ],
+  "reviewsByRound": [
+    "array"
+  ],
+  "category": [
+    "string"
+  ],
+  "totalReviewers": [
+    "number"
+  ],
+  "averageRating": [
+    "number"
+  ],
+  "rejectionReason": [
+    "string"
+  ],
+  "rejectionComments": [
+    "string"
+  ],
+  "editorId": [
+    "object"
+  ],
+  "editorEmail": [
+    "string"
+  ],
+  "editorName": [
+    "string"
+  ],
+  "rejectionDate": [
+    "date"
+  ],
+  "revisionCount": [
+    "number"
+  ],
+  "conferenceYear": [
+    "number"
+  ],
+  "conferenceName": [
+    "string"
+  ],
+  "reviewers": [
+    "array"
+  ],
+  "createdAt": [
+    "date"
+  ],
+  "updatedAt": [
+    "date"
+  ],
+  "__v": [
+    "number"
+  ]
+}

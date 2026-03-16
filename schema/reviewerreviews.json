@@ -1,0 +1,74 @@
+{
+  "_id": [
+    "object"
+  ],
+  "paper": [
+    "object"
+  ],
+  "reviewer": [
+    "object"
+  ],
+  "reviewerName": [
+    "string"
+  ],
+  "reviewerEmail": [
+    "string"
+  ],
+  "round": [
+    "number"
+  ],
+  "comments": [
+    "string"
+  ],
+  "commentsToReviewer": [
+    "string"
+  ],
+  "commentsToEditor": [
+    "string"
+  ],
+  "strengths": [
+    "string"
+  ],
+  "weaknesses": [
+    "string"
+  ],
+  "overallRating": [
+    "number"
+  ],
+  "noveltyRating": [
+    "number"
+  ],
+  "qualityRating": [
+    "number"
+  ],
+  "clarityRating": [
+    "number"
+  ],
+  "recommendation": [
+    "string"
+  ],
+  "reviewedPdfUrl": [
+    "string"
+  ],
+  "status": [
+    "string"
+  ],
+  "assignedAt": [
+    "date"
+  ],
+  "deadline": [
+    "date"
+  ],
+  "submittedAt": [
+    "date"
+  ],
+  "createdAt": [
+    "date"
+  ],
+  "updatedAt": [
+    "date"
+  ],
+  "__v": [
+    "number"
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "_id": [
+    "object"
+  ],
+  "submissionId": [
+    "string"
+  ],
+  "revisionNumber": [
+    "number"
+  ],
+  "paperId": [
+    "object"
+  ],
+  "authorEmail": [
+    "string"
+  ],
+  "authorName": [
+    "string"
+  ],
+  "editorEmail": [
+    "string"
+  ],
+  "editorName": [
+    "string"
+  ],
+  "revisionDeadline": [
+    "date"
+  ],
+  "revisionStatus": [
+    "string"
+  ],
+  "reviewerComments": [
+    "array"
+  ],
+  "revisionMessage": [
+    "string"
+  ],
+  "finalOutcome": [
+    "string"
+  ],
+  "revisionRound": [
+    "number"
+  ],
+  "revisionRequestedAt": [
+    "date"
+  ],
+  "createdAt": [
+    "date"
+  ],
+  "updatedAt": [
+    "date"
+  ],
+  "__v": [
+    "number"
+  ],
+  "cleanPdfFileName": [
+    "string"
+  ],
+  "cleanPdfPublicId": [
+    "string"
+  ],
+  "cleanPdfUrl": [
+    "string"
+  ],
+  "highlightedPdfFileName": [
+    "string"
+  ],
+  "highlightedPdfPublicId": [
+    "string"
+  ],
+  "highlightedPdfUrl": [
+    "string"
+  ],
+  "responsePdfFileName": [
+    "string"
+  ],
+  "responsePdfPublicId": [
+    "string"
+  ],
+  "responsePdfUrl": [
+    "string"
+  ],
+  "revisedPaperSubmittedAt": [
+    "date"
+  ]
+}

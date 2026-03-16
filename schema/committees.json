@@ -1,0 +1,38 @@
+{
+  "_id": [
+    "object"
+  ],
+  "name": [
+    "string"
+  ],
+  "role": [
+    "string"
+  ],
+  "affiliation": [
+    "string"
+  ],
+  "country": [
+    "string"
+  ],
+  "designation": [
+    "string"
+  ],
+  "image": [
+    "string"
+  ],
+  "order": [
+    "number"
+  ],
+  "active": [
+    "boolean"
+  ],
+  "createdAt": [
+    "date"
+  ],
+  "updatedAt": [
+    "date"
+  ],
+  "__v": [
+    "number"
+  ]
+}

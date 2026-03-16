@@ -1,0 +1,51 @@
+{
+  "_id": [
+    "object"
+  ],
+  "paperId": [
+    "object"
+  ],
+  "submissionId": [
+    "string"
+  ],
+  "reviewerId": [
+    "object"
+  ],
+  "reviewerEmail": [
+    "string"
+  ],
+  "reviewerName": [
+    "string"
+  ],
+  "paperTitle": [
+    "string"
+  ],
+  "abstract": [
+    "null",
+    "string"
+  ],
+  "status": [
+    "string"
+  ],
+  "rejectionReason": [
+    "null"
+  ],
+  "alternativeReviewerEmail": [
+    "null"
+  ],
+  "alternativeReviewerName": [
+    "null"
+  ],
+  "reviewDeadline": [
+    "date"
+  ],
+  "createdAt": [
+    "date"
+  ],
+  "__v": [
+    "number"
+  ],
+  "respondedAt": [
+    "date"
+  ]
+}

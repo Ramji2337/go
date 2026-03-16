@@ -1,0 +1,26 @@
+{
+  "_id": [
+    "object"
+  ],
+  "email": [
+    "string"
+  ],
+  "submissionId": [
+    "string"
+  ],
+  "bookingId": [
+    "string"
+  ],
+  "submissionDate": [
+    "date"
+  ],
+  "createdAt": [
+    "date"
+  ],
+  "updatedAt": [
+    "date"
+  ],
+  "__v": [
+    "number"
+  ]
+}
