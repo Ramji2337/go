@@ -565,10 +565,15 @@ func ReuploadPaper(c *fiber.Ctx) error {
 		})
 	}
 
-	f, _ := file.Open()
+	f, err := file.Open()
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"success": false, "message": "Failed to read uploaded file"})
+	}
 	defer f.Close()
 	fileBytes := make([]byte, file.Size)
-	f.Read(fileBytes)
+	if _, err := f.Read(fileBytes); err != nil {
+		return c.Status(500).JSON(fiber.Map{"success": false, "message": "Failed to read uploaded file"})
+	}
 
 	pdfUrl, pdfPublicId, err := config.UploadPDF(ctx, fileBytes, fmt.Sprintf("%s_%s", submissionId, file.Filename))
 	if err != nil {
@@ -590,7 +595,7 @@ func ReuploadPaper(c *fiber.Ctx) error {
 		"submittedAt": now,
 	}
 
-	col.UpdateOne(ctx, bson.M{"submissionId": submissionId}, bson.M{
+	if _, err := col.UpdateOne(ctx, bson.M{"submissionId": submissionId}, bson.M{
 		"$set": bson.M{
 			"pdfUrl":      pdfUrl,
 			"pdfPublicId": pdfPublicId,
@@ -598,7 +603,9 @@ func ReuploadPaper(c *fiber.Ctx) error {
 			"updatedAt":   now,
 		},
 		"$push": bson.M{"versions": newVersion},
-	})
+	}); err != nil {
+		return c.Status(500).JSON(fiber.Map{"success": false, "message": "Failed to update paper record"})
+	}
 
 	return c.Status(200).JSON(fiber.Map{
 		"success": true,
@@ -681,7 +688,9 @@ func GetAllRevisions(c *fiber.Ctx) error {
 	defer cursor.Close(ctx)
 
 	var revisions []bson.M
-	cursor.All(ctx, &revisions)
+	if err := cursor.All(ctx, &revisions); err != nil {
+		return c.Status(500).JSON(fiber.Map{"success": false, "message": "Error decoding revisions"})
+	}
 
 	return c.Status(200).JSON(fiber.Map{
 		"success":        true,
@@ -805,10 +814,12 @@ func GetPaperHistory(c *fiber.Ctx) error {
 	if paperId, ok := paper["_id"].(primitive.ObjectID); ok {
 		reviewQuery["paper"] = paperId
 	}
-	reviewCursor, _ := reviewsCol.Find(ctx, reviewQuery, options.Find().SetSort(bson.M{"createdAt": 1}))
+	reviewCursor, err := reviewsCol.Find(ctx, reviewQuery, options.Find().SetSort(bson.M{"createdAt": 1}))
 	var reviews []bson.M
-	reviewCursor.All(ctx, &reviews)
-	reviewCursor.Close(ctx)
+	if err == nil {
+		reviewCursor.All(ctx, &reviews)
+		reviewCursor.Close(ctx)
+	}
 	for _, review := range reviews {
 		var overallRating interface{}
 		if ratings, ok := review["ratings"].(bson.M); ok {
@@ -828,10 +839,12 @@ func GetPaperHistory(c *fiber.Ctx) error {
 
 	// 6. Revision cycles
 	revisionsCol := config.GetCollection("revisions")
-	revCursor, _ := revisionsCol.Find(ctx, bson.M{"submissionId": submissionId}, options.Find().SetSort(bson.M{"revisionNumber": 1}))
+	revCursor, err := revisionsCol.Find(ctx, bson.M{"submissionId": submissionId}, options.Find().SetSort(bson.M{"revisionNumber": 1}))
 	var detailedRevisions []bson.M
-	revCursor.All(ctx, &detailedRevisions)
-	revCursor.Close(ctx)
+	if err == nil {
+		revCursor.All(ctx, &detailedRevisions)
+		revCursor.Close(ctx)
+	}
 	for _, rev := range detailedRevisions {
 		timeline = append(timeline, fiber.Map{
 			"type":        "revision_cycle",
@@ -871,17 +884,19 @@ func GetPaperHistory(c *fiber.Ctx) error {
 	// 7. Messages
 	msgCol := config.GetCollection("papermessages")
 	var paperMessages bson.M
-	msgCol.FindOne(ctx, bson.M{"submissionId": submissionId}).Decode(&paperMessages)
-	if msgs, ok := paperMessages["messages"].(bson.A); ok {
-		for _, m := range msgs {
-			if msg, ok := m.(bson.M); ok {
-				timeline = append(timeline, fiber.Map{
-					"type":        "message",
-					"date":        msg["timestamp"],
-					"title":       fmt.Sprintf("Message from %v", msg["sender"]),
-					"description": msg["message"],
-					"details":     fiber.Map{"senderName": msg["senderName"]},
-				})
+	_ = msgCol.FindOne(ctx, bson.M{"submissionId": submissionId}).Decode(&paperMessages)
+	if paperMessages != nil {
+		if msgs, ok := paperMessages["messages"].(bson.A); ok {
+			for _, m := range msgs {
+				if msg, ok := m.(bson.M); ok {
+					timeline = append(timeline, fiber.Map{
+						"type":        "message",
+						"date":        msg["timestamp"],
+						"title":       fmt.Sprintf("Message from %v", msg["sender"]),
+						"description": msg["message"],
+						"details":     fiber.Map{"senderName": msg["senderName"]},
+					})
+				}
 			}
 		}
 	}
