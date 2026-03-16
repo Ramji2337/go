@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -227,7 +228,7 @@ func GetUserSubmission(c *fiber.Ctx) error {
 	defer cancel()
 
 	col := config.GetCollection("papersubmissions")
-	filter := bson.M{"email": bson.M{"$regex": "^" + email + "$", "$options": "i"}}
+	filter := bson.M{"email": bson.M{"$regex": "^" + regexp.QuoteMeta(email) + "$", "$options": "i"}}
 	opts := options.Find().SetSort(bson.M{"createdAt": -1})
 	cursor, err := col.Find(ctx, filter, opts)
 	if err != nil {

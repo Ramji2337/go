@@ -24,7 +24,7 @@ func VerifyJWT(c *fiber.Ctx) error {
 	}
 
 	if token == "" {
-		return c.Status(403).JSON(fiber.Map{
+		return c.Status(401).JSON(fiber.Map{
 			"success": false,
 			"message": "Access denied. No token provided.",
 		})

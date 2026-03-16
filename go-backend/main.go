@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -48,7 +47,7 @@ func main() {
 		allowedOrigins = "http://localhost:5173"
 	}
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     strings.Join(strings.Split(allowedOrigins, ","), ","),
+		AllowOrigins:     allowedOrigins,
 		AllowCredentials: true,
 		AllowMethods:     "GET,POST,PUT,DELETE,PATCH,OPTIONS",
 		AllowHeaders:     "Content-Type,Authorization",

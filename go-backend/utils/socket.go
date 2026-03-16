@@ -31,8 +31,14 @@ h.adminConns[userID] = ch
 func (h *SocketHub) Unregister(userID string) {
 h.mu.Lock()
 defer h.mu.Unlock()
-delete(h.connections, userID)
-delete(h.adminConns, userID)
+if ch, ok := h.connections[userID]; ok {
+	close(ch)
+	delete(h.connections, userID)
+}
+if ch, ok := h.adminConns[userID]; ok {
+	close(ch)
+	delete(h.adminConns, userID)
+}
 }
 
 func (h *SocketHub) EmitToUser(userID string, event string, data interface{}) {
@@ -65,4 +71,9 @@ Hub.EmitToUser(userID, event, data)
 
 func EmitToAdmins(event string, data interface{}) {
 Hub.EmitToAdmins(event, data)
+}
+
+// NewUserChannel creates a buffered channel for a user connection.
+func NewUserChannel() chan interface{} {
+return make(chan interface{}, 100)
 }
