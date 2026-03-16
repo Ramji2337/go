@@ -542,3 +542,126 @@ func SendRegistrationConfirmationEmail(data map[string]interface{}) error {
 
 	return sendEmail(email, "Registration Received - ICMBNT 2026", body)
 }
+
+func SendReviewSubmissionEmail(editorEmail, editorName, submissionId, reviewerName, recommendation string, overallRating int) error {
+	stars := ""
+	for i := 1; i <= 5; i++ {
+		if i <= overallRating {
+			stars += "★"
+		} else {
+			stars += "☆"
+		}
+	}
+
+	body := fmt.Sprintf(`
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <h2 style="color: #16a34a;">✅ Review Submitted</h2>
+  <p>Dear %s,</p>
+  <p>A reviewer has submitted their review for a paper assigned to you.</p>
+  <table style="width: 100%%; border-collapse: collapse; margin: 16px 0;">
+    <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Submission ID</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">%s</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Reviewer Name</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">%s</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Recommendation</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">%s</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Overall Rating</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0; font-size: 18px; color: #d97706;">%s (%d/5)</td></tr>
+  </table>
+  <p>Please log in to your editor dashboard to view the full review details.</p>
+  <a href="%s/editor/dashboard" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Go to Dashboard</a>
+</body>
+</html>`, editorName, submissionId, reviewerName, recommendation, stars, overallRating, frontendURL())
+
+	return sendEmail(editorEmail, fmt.Sprintf("Review Submitted: %s", submissionId), body)
+}
+
+func SendReviewerAssignmentWithAcceptance(reviewerEmail, reviewerName, submissionId, paperTitle, category, deadline, acceptanceToken string) error {
+	feURL := frontendURL()
+	acceptURL := fmt.Sprintf("%s/reviewer-accept?token=%s", feURL, acceptanceToken)
+	declineURL := fmt.Sprintf("%s/reviewer-reject?token=%s", feURL, acceptanceToken)
+
+	body := fmt.Sprintf(`
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: #fef3c7; border: 1px solid #d97706; padding: 12px 16px; border-radius: 4px; margin-bottom: 16px; text-align: center; font-weight: bold; color: #92400e;">[ACTION REQUIRED] Review Assignment Invitation</div>
+  <h2 style="color: #2563eb;">Review Assignment - ICMBNT 2026</h2>
+  <p>Dear %s,</p>
+  <p>You have been invited to review a paper submitted to ICMBNT 2026. Please review the details below and indicate whether you accept or decline this assignment.</p>
+  <table style="width: 100%%; border-collapse: collapse; margin: 16px 0;">
+    <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Submission ID</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">%s</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Paper Title</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">%s</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Category</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">%s</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Deadline</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">%s</td></tr>
+  </table>
+  <div style="text-align: center; margin: 24px 0;">
+    <a href="%s" style="display: inline-block; background-color: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin-right: 8px;">Accept Assignment</a>
+    <a href="%s" style="display: inline-block; background-color: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Decline Assignment</a>
+  </div>
+  <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px 16px; margin: 16px 0;">
+    <strong>If You Accept:</strong>
+    <p style="margin: 8px 0 0 0;">You will gain access to the paper and be expected to submit your review by the deadline indicated above. Please ensure your review is thorough and constructive.</p>
+  </div>
+  <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 12px 16px; margin: 16px 0;">
+    <strong>If You Decline:</strong>
+    <p style="margin: 8px 0 0 0;">The paper will be reassigned to another reviewer. We appreciate you letting us know promptly so we can maintain the review timeline.</p>
+  </div>
+  <div style="background: #f8fafc; padding: 16px; border-radius: 4px; margin: 16px 0;">
+    <strong>Review Guidelines:</strong>
+    <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+      <li>Evaluate the paper objectively based on originality, methodology, and clarity.</li>
+      <li>Provide constructive feedback to help the authors improve their work.</li>
+      <li>Submit your review before the deadline.</li>
+      <li>Maintain confidentiality of the manuscript.</li>
+    </ul>
+  </div>
+</body>
+</html>`, reviewerName, submissionId, paperTitle, category, deadline, acceptURL, declineURL)
+
+	return sendEmail(reviewerEmail, fmt.Sprintf("Review Invitation: %s - ICMBNT 2026", submissionId), body)
+}
+
+func SendReviewerThankYouEmail(reviewerEmail, reviewerName, submissionId, paperTitle, submittedAt string) error {
+	body := fmt.Sprintf(`
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <h2 style="color: #16a34a;">✓ Thank You for Your Review</h2>
+  <p>Dear %s,</p>
+  <p>Thank you for submitting your review. Your expertise and time are greatly valued by the ICMBNT 2026 committee.</p>
+  <table style="width: 100%%; border-collapse: collapse; margin: 16px 0;">
+    <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Paper Title</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">%s</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Submission ID</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">%s</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Submitted On</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">%s</td></tr>
+  </table>
+  <p>Your review has been recorded and will be considered by the editor when making a decision on this paper.</p>
+  <p>If you have any questions or need to update your review, please contact the editorial team.</p>
+  <p style="margin-top: 24px;">Best regards,<br>ICMBNT 2026 Organizing Committee</p>
+</body>
+</html>`, reviewerName, paperTitle, submissionId, submittedAt)
+
+	return sendEmail(reviewerEmail, fmt.Sprintf("Thank You for Your Review - %s", submissionId), body)
+}
+
+func SendPaperAcceptedEmail(email, submissionId, paperTitle, authorName, category string) error {
+	copyrightURL := fmt.Sprintf("%s/copyright-dashboard", frontendURL())
+
+	body := fmt.Sprintf(`
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <h2 style="color: #16a34a;">🎉 Congratulations!</h2>
+  <p>Dear %s,</p>
+  <p>We are pleased to inform you that your paper has been accepted for ICMBNT 2026.</p>
+  <table style="width: 100%%; border-collapse: collapse; margin: 16px 0;">
+    <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Submission ID</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">%s</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Paper Title</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">%s</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Category</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">%s</td></tr>
+  </table>
+  <p>Please proceed to complete the copyright form to finalize your submission.</p>
+  <a href="%s" style="display: inline-block; background-color: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Complete Copyright Form</a>
+  <p style="margin-top: 16px;">If you have any questions, please contact the conference organizing committee.</p>
+</body>
+</html>`, authorName, submissionId, paperTitle, category, copyrightURL)
+
+	return sendEmail(email, fmt.Sprintf("Paper Accepted: %s - ICMBNT 2026", submissionId), body)
+}
