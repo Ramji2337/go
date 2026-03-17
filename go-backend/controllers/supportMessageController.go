@@ -138,3 +138,131 @@ func DeleteSupportMessage(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(fiber.Map{"success": true, "message": "Message deleted"})
 }
+
+func GetMySupportMessages(c *fiber.Ctx) error {
+	claims := c.Locals("user").(*middleware.JWTClaims)
+	authorId := claims.UserID
+	authorEmail := claims.Email
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	col := config.GetCollection("supportmessages")
+	var supportThread bson.M
+	err := col.FindOne(ctx, bson.M{"authorId": authorId}).Decode(&supportThread)
+
+	if err != nil {
+		// Thread not found, create one
+		usersCol := config.GetCollection("users")
+		authorObjId, _ := primitive.ObjectIDFromHex(authorId)
+		var user bson.M
+		usersCol.FindOne(ctx, bson.M{"_id": authorObjId}).Decode(&user)
+
+		authorName := authorEmail
+		if user != nil {
+			if uname, ok := user["username"].(string); ok && uname != "" {
+				authorName = uname
+			}
+		}
+
+		newThread := bson.M{
+			"authorId":    authorId,
+			"authorEmail": authorEmail,
+			"authorName":  authorName,
+			"messages":    bson.A{},
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+		}
+		result, insertErr := col.InsertOne(ctx, newThread)
+		if insertErr != nil {
+			return c.Status(500).JSON(fiber.Map{"success": false, "message": "Error creating support thread"})
+		}
+		newThread["_id"] = result.InsertedID
+		return c.Status(200).JSON(fiber.Map{
+			"success":     true,
+			"data":        newThread,
+			"unreadCount": 0,
+		})
+	}
+
+	// Mark admin messages as read by author
+	modified := false
+	if msgs, ok := supportThread["messages"].(bson.A); ok {
+		for i, m := range msgs {
+			if msg, ok := m.(bson.M); ok {
+				sender, _ := msg["sender"].(string)
+				isRead, _ := msg["isReadByAuthor"].(bool)
+				if sender == "Admin" && !isRead {
+					msg["isReadByAuthor"] = true
+					msgs[i] = msg
+					modified = true
+				}
+			}
+		}
+		if modified {
+			col.UpdateOne(ctx, bson.M{"_id": supportThread["_id"]}, bson.M{"$set": bson.M{"messages": msgs}})
+			supportThread["messages"] = msgs
+		}
+	}
+
+	// Count unread
+	unreadCount := 0
+	if msgs, ok := supportThread["messages"].(bson.A); ok {
+		for _, m := range msgs {
+			if msg, ok := m.(bson.M); ok {
+				sender, _ := msg["sender"].(string)
+				isRead, _ := msg["isReadByAuthor"].(bool)
+				if sender == "Admin" && !isRead {
+					unreadCount++
+				}
+			}
+		}
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"success":     true,
+		"data":        supportThread,
+		"unreadCount": unreadCount,
+	})
+}
+
+func GetAllSupportThreads(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	col := config.GetCollection("supportmessages")
+	opts := options.Find().SetSort(bson.M{"lastMessageAt": -1})
+	cursor, err := col.Find(ctx, bson.M{}, opts)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"success": false, "message": "Error fetching messages"})
+	}
+	defer cursor.Close(ctx)
+
+	var threads []bson.M
+	cursor.All(ctx, &threads)
+
+	totalUnread := 0
+	for i, t := range threads {
+		unreadCount := 0
+		if msgs, ok := t["messages"].(bson.A); ok {
+			for _, m := range msgs {
+				if msg, ok := m.(bson.M); ok {
+					sender, _ := msg["sender"].(string)
+					isRead, _ := msg["isReadByAdmin"].(bool)
+					if sender == "Author" && !isRead {
+						unreadCount++
+					}
+				}
+			}
+		}
+		threads[i]["unreadCount"] = unreadCount
+		totalUnread += unreadCount
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"success":      true,
+		"count":        len(threads),
+		"data":         threads,
+		"totalUnread":  totalUnread,
+	})
+}

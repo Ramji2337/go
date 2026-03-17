@@ -110,3 +110,22 @@ func DeleteCommitteeMember(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(fiber.Map{"success": true, "message": "Committee member deleted"})
 }
+
+func GetMemberById(c *fiber.Ctx) error {
+	memberId := c.Params("id")
+	memberObjId, err := primitive.ObjectIDFromHex(memberId)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"success": false, "message": "Invalid member ID"})
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	col := config.GetCollection("committeemembers")
+	var member bson.M
+	if err := col.FindOne(ctx, bson.M{"_id": memberObjId}).Decode(&member); err != nil {
+		return c.Status(404).JSON(fiber.Map{"success": false, "message": "Committee member not found"})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"success": true, "data": member})
+}

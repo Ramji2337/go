@@ -16,8 +16,12 @@ func SetupPaperRoutes(app *fiber.App) {
 	papers.Get("/check-selection", controllers.CheckFinalSelection)
 	papers.Put("/edit/:submissionId", controllers.EditSubmission)
 	papers.Post("/submit-revision", controllers.SubmitRevision)
-	papers.Post("/reupload/:submissionId", controllers.SubmitRevision)
+	papers.Post("/reupload/:submissionId", controllers.ReuploadPaper)
 	papers.Get("/status/:submissionId", controllers.GetPaperStatus)
+	papers.Get("/revision/:submissionId", controllers.GetRevisionData)
+	papers.Get("/revisions/:submissionId", controllers.GetAllRevisions)
+	papers.Post("/upload-final-doc/:submissionId", controllers.UploadFinalDoc)
 	papers.Get("/all", middleware.RequireRole("Admin", "Editor"), controllers.GetAllPapersAdmin)
+	papers.Get("/:submissionId/history", controllers.GetPaperHistory)
 	papers.Get("/:id", middleware.RequireRole("Admin", "Editor", "Reviewer"), controllers.GetPaperById)
 }
