@@ -41,6 +41,9 @@ func main() {
 	app.Use(recover.New())
 	app.Use(logger.New())
 	app.Use(mw.SecurityHeaders)
+	app.Use(mw.SecurityLogger)
+	app.Use(mw.MongoSanitize)
+	app.Use(mw.APILimiter)
 
 	allowedOrigins := os.Getenv("ALLOWED_ORIGINS")
 	if allowedOrigins == "" {
